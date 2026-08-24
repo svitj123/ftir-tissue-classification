@@ -97,9 +97,19 @@ python3 models/modelB_spectral_cnn_faithful.py --seed 42 \
 
 # Prostorsko-spektralni CNN (flagship konfiguracija)
 python3 models/modelC_fullslide_faithful_v20_v63_regularized.py \
-    --weight-decay 0.003 --grad-clip 0.5 --seed 42 \
+    --optimizer adadelta --lr 0.1 --final-epochs 8 \
+    --use-lrn --dropout 0.5 --weight-decay 0.003 --grad-clip 0.5 \
+    --balance-strategy oversample --oversample-target 100000 \
+    --no-augment --no-tta --skip-faza-a \
+    --seed 42 \
     --output results/figures/modelC_fullslide_faithful_v20_gc05_seed42.npz
 ```
+
+Zastavice so navedene izrecno, tudi tiste, ki se ujemajo s privzetimi
+vrednostmi skripte -- privzetki namreč ustrezajo posodobljeni različici
+modela (optimizator Adam, brez lokalne odzivne normalizacije, z
+augmentacijo), ne pa članku zvesti konfiguraciji zgoraj. Brez izrecno
+naštetih zastavic ukaz nauči bistveno drugačen model.
 
 ## Že natrenirani modeli in rezultati
 
