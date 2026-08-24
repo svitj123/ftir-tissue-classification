@@ -43,7 +43,7 @@ ftir-tissue-classification/
         ├── *.py                          -- skripte za grafe/tabele iz diplome
         ├── modelA_svm_rbf_faithful_flagship.npz      -- napovedi flagship SVM (testna množica)
         ├── modelA_svm_rbf_faithful_flagship.joblib   -- natreniran flagship SVM model
-        ├── modelSpectral_reusedCNN_oversample_seed42.npz  -- napovedi flagship spektralnega CNN
+        ├── modelB_spectral_cnn_faithful_seed42.npz   -- napovedi flagship spektralnega CNN
         └── modelC_fullslide_faithful_v20_gc05_seed42.npz  -- napovedi flagship prostorsko-spektralnega CNN
 ```
 
@@ -86,13 +86,19 @@ stroga -- podrobneje v diplomskem besedilu.
 ## Zagon modelov
 
 ```bash
-# RBF SVM (10 ponovitev, ~5h za flagship potrditev)
+# RBF SVM (10 ponovitev, ~5,5 h za flagship potrditev)
 python3 models/modelA_svm_rbf_faithful.py \
+    --C 1.0 --gamma scale_1_16 \
+    --samples-per-class 10000 --n-repeats 10 --seed-base 0 \
     --save-probs results/figures/modelA_svm_rbf_faithful_flagship.npz \
     --save-model results/figures/modelA_svm_rbf_faithful_flagship.joblib
 
 # Spektralni CNN
-python3 models/modelB_spectral_cnn_faithful.py --seed 42 \
+python3 models/modelB_spectral_cnn_faithful.py \
+    --optimizer adam --lr 0.001 --final-epochs 8 \
+    --use-lrn --weight-decay 0.001 \
+    --balance-strategy oversample --oversample-target 100000 \
+    --seed 42 \
     --output results/figures/modelB_spectral_cnn_faithful_seed42.npz
 
 # Prostorsko-spektralni CNN (flagship konfiguracija)
@@ -105,21 +111,35 @@ python3 models/modelC_fullslide_faithful_v20_v63_regularized.py \
     --output results/figures/modelC_fullslide_faithful_v20_gc05_seed42.npz
 ```
 
-Zastavice so navedene izrecno, tudi tiste, ki se ujemajo s privzetimi
-vrednostmi skripte -- privzetki namreč ustrezajo posodobljeni različici
-modela (optimizator Adam, brez lokalne odzivne normalizacije, z
-augmentacijo), ne pa članku zvesti konfiguraciji zgoraj. Brez izrecno
-naštetih zastavic ukaz nauči bistveno drugačen model.
+Vsi parametri ukazne vrstice so navedeni izrecno, tudi tisti, ki se
+ujemajo s privzetimi vrednostmi skript. Pri prostorsko-spektralnem modelu
+privzetki namreč ustrezajo posodobljeni različici (optimizator Adam, brez
+lokalne odzivne normalizacije, z augmentacijo), ne pa članku zvesti
+konfiguraciji zgoraj; tudi spektralni CNN brez `--use-lrn` zgradi
+drugačno arhitekturo od tiste, s katero je bil dobljen poročani rezultat.
+Brez izrecno naštetih parametrov ukaza naučita bistveno drugačen model.
 
 ## Že natrenirani modeli in rezultati
 
 V `results/figures/` so poleg skript za grafe/tabele iz diplome tudi
 **že izračunane napovedi flagship modelov** (`.npz`, verjetnosti na testni
-množici) in **natreniran RBF SVM model** (`.joblib`). S temi datotekami
-lahko kdorkoli regenerira vse grafe in tabele iz diplome (`results/figures/*.py`),
-ne da bi imel dostop do surovih/predobdelanih podatkov ali ponovno
-treniral modele. Za dejansko ponovitev treninga (in preverjanje rezultatov
-iz zgornje tabele) so seveda potrebni podatki -- glej razdelek "Podatki".
+množici) in **natreniran RBF SVM model** (`.joblib`).
+
+S temi datotekami je mogoče brez dostopa do podatkov in brez ponovnega
+treniranja regenerirati grafe in tabele, ki temeljijo izključno na
+napovedih -- `matrika_zmede_tabela.py`, `roc_auc_primerjava.py`,
+`oa_primerjava_horizontalna.py` in `oa_primerjava_krivulja.py`.
+
+Preostale tri skripte (`klasifikacijska_mapa.py`,
+`demo_baseline_normalizacija_multi.py`, `uvod_problem.py`) prikazujejo
+sámo tkivo oziroma surove spektre, zato potrebujejo surove podatke ENVI
+oziroma predobdelane izseke. Poti do njih so v teh skriptah trdo
+kodirane na okolje, v katerem so nastale (glej docstring vsake), in jih je
+treba pred zagonom prilagoditi. Enako velja za `MASK_DIRS` v
+`preprocessing/build_fullslide_std.py`.
+
+Za dejansko ponovitev treninga (in preverjanje rezultatov iz zgornje
+tabele) so seveda potrebni podatki -- glej razdelek "Podatki".
 
 ## Vir
 
